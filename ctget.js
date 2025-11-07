@@ -1,10 +1,6 @@
 (() => {
     const ctfile = {
-        version: () => { return "2.6.9" },
-        buildToken: () => {
-            let token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            return token;
-        },
+        version: () => { return "2.6.10" },
         getByLink: (link, password, token, firstcallback) => {
             console.warn("ctfile.getByLink is deprecated, use ctfile.getByID instead.");
             return ctfile.getByID(link.substring(link.lastIndexOf("/") + 1, (link.lastIndexOf("?") == -1) ? undefined : link.lastIndexOf("?")), (link.lastIndexOf("p=") == -1) ? password : link.substring(link.lastIndexOf("p=") + 2), token, firstcallback);
@@ -30,10 +26,11 @@
                 }
             }
             jsonText = JSON.parse(await (await fetch("https://webapi.ctfile.com/getfile.php?path=" + path(fileid) + "&f=" + fileid + "&passcode=" + password + "&token=" + token + "&r=" + Math.random() + "&ref=" + origin(), {
-                "headers": {
+                headers: {
                     "origin": origin(),
                     "referer": origin()
                 },
+                credentials: "include"
             })).text());
             if (jsonText.code == 200) {
                 if (firstCallback) {
@@ -86,10 +83,11 @@
                     };
                 } else {
                     jsonText2 = JSON.parse(await (await fetch("https://webapi.ctfile.com/get_file_url.php?uid=" + jsonText.file.userid + "&fid=" + jsonText.file.file_id + "&file_chk=" + jsonText.file.file_chk + "&app=0&acheck=2&rd=" + Math.random(), {
-                        "headers": {
+                        headers: {
                             "origin": origin(),
                             "referer": origin()
                         },
+                        credentials: "include"
                     })).text());
                     if (jsonText2.code == 200) {
                         return {

@@ -475,7 +475,7 @@
             document.getElementById("token").addEventListener("change", () => {
                 Module.pref.set("token", document.getElementById("token").value);
             })
-            document.getElementById("token").value = Module.pref.get("token") || Module.pref.set("token", Module.ctfile.buildToken());
+            document.getElementById("token").value = Module.pref.get("token") || "等待登录...";
             const emptyfile = () => {
                 document.getElementById("filename").value = "";
                 document.getElementById("dllink").value = "";
@@ -540,7 +540,7 @@
                 document.getElementById("autopass").style.filter = "invert(65%) sepia(20%) saturate(754%) hue-rotate(95deg) brightness(90%) contrast(89%)";
             };
             document.getElementById("tokenhelp").onclick = () => {
-                location.replace("https://www.ctfile.com/tokenGo.php?token=" + document.getElementById("token").value + "&url=https%3A%2F%2Fwww.ctfile.com%2Fp%2Flogin");
+                location.replace("https://www.ctfile.com/p/login?ref=" + encodeURIComponent(location.origin));
             }
             document.getElementById("localParse").onclick = async () => {
                 let getToken = () => {
@@ -609,7 +609,7 @@
                         size: file.size,
                         time: file.time,
                     }
-                    if (!record.link.startsWith("tempdir")){
+                    if (!record.link.startsWith("tempdir")) {
                         const store = localStorage.getItem("store")
                         let records = JSON.parse(store);
 
@@ -633,6 +633,25 @@
             //Process query
             if (location.search) {
                 let url = new URLSearchParams(location.search);
+                if (url.get("auth_code")) {
+                    document.getElementById("token").value = "登录中...";
+                    let req = await fetch("https://webapi.ctfile.com/api.php?item=account&action=auth_code_exchange", {
+                        "headers": {
+                            "accept": "application/json, text/javascript, */*; q=0.01",
+                            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        },
+                        "body": "auth_code=" + encodeURIComponent(url.get("auth_code")),
+                        "method": "POST",
+                        "credentials": "include",
+                        "mode": "cors",
+                        "referrerPolicy": "unsafe-url"
+                    });
+                    let resp = await req.json();
+                    if (resp.code == 200) {
+                        document.getElementById("token").value = resp.session_id;
+                        Module.pref.set("token", resp.session_id);
+                    }
+                }
                 if (url.get("file")) {
                     document.getElementById("link").value = url.get("file");
                     if (url.get("pass")) {

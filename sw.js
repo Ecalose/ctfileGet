@@ -1,5 +1,5 @@
 var APP_PREFIX = '城通解析';
-var VERSION = '2.4.4';
+var VERSION = '2.4.5';
 var CACHE_NAME = APP_PREFIX + VERSION
 var URLS = []
 
@@ -16,7 +16,7 @@ self.addEventListener('fetch', function (event) {
         return CACHE_NAME;
     }
 
-    if (event.request.method == "GET" && (event.request.url.indexOf("http") == 0) && (event.request.url.indexOf("ForceNoCache") == -1) && (event.request.url.startsWith(location.origin))) {
+    if (event.request.method == "GET" && (event.request.url.indexOf("http") == 0) && (event.request.url.indexOf("ForceNoCache") == -1) && (event.request.url.startsWith(location.origin)) && (event.request.url.indexOf("auth_code") == -1)) {
         event.respondWith(
             caches.open(getCacheName(event.request.url)).then(function (cache) {
                 return cache.match(event.request).then(function (response) {
